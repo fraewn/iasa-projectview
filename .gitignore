@@ -74,3 +74,6 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+src/server/resources/static
+src/server/resources/application.properties
