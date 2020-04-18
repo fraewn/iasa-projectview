@@ -1,0 +1,238 @@
+openapi: 3.0.1
+info:
+  title: 'IASA ProjectView'
+  description: 'Description'
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: accounts@malteesch.de
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/
+    description: 'Dev'
+  - url: http://10.20.107.223:8080/
+    description: 'Depl'
+tags:
+  - name: 'authentication'
+    description: 'Registration, login, password reset'
+  - name: 'user management'
+    description: 'Everything involving user management (requires ADMIN rights)'
+  - name: 'schools'
+    description: 'Manage schools'
+paths:
+  /login:
+    post:
+      security: []
+      tags:
+        - 'authentication'
+      summary: 'Login route'
+      description: 'Login to receive an authentication token.'
+      requestBody:
+        description: 'Identifier can either be your username or your email.'
+        content:
+          application/json:
+            schema:
+              type: 'object'
+              properties:
+                identifier:
+                  type: 'string'
+                  description: 'username or email'
+                password:
+                  type: 'string'
+              required:
+                - identifier
+                - password
+      responses:
+        200:
+          description: 'OK'
+          headers:
+            Authorization:
+              schema:
+                type: string
+              description: 'Apikey in the form of "Bearer {TOKEN}"'
+        400:
+          description: 'Bad Request. Body does not have the correct form.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+        401:
+          description: 'Unauthorized. Identifier or password are wrong.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiErrorResponse'
+  /users:
+    get:
+      tags:
+        - 'user management'
+      summary: 'Get all users'
+      description: 'Get all users existing in the application'
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: 'object'
+                    properties:
+                      data:
+                        type: 'array'
+                        items:
+                          $ref: '#/components/schemas/UserBasicInfo'
+    post:
+      security: []
+      tags:
+        - 'user management'
+        - 'authentication'
+      summary: 'Register route'
+      description: 'Add/register a new user.'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDto'
+
+      responses:
+        201:
+          description: 'Created'
+          headers:
+            Location:
+              schema:
+                type: 'string'
+                example: '/users/2'
+  /users/{id}:
+    get:
+      tags:
+        - 'user management'
+      parameters:
+        - name: 'id'
+          in: 'path'
+          description: 'User ID'
+          required: true
+          schema:
+            type: 'integer'
+            format: 'int64'
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: 'object'
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserBasicInfo'
+    put:
+      tags:
+        - 'user management'
+      parameters:
+        - name: 'id'
+          in: 'path'
+          description: 'User ID'
+          required: true
+          schema:
+            type: 'integer'
+            format: 'int64'
+      responses:
+        200:
+          description: 'OK'
+    delete:
+      tags:
+        - 'user management'
+      parameters:
+        - name: 'id'
+          in: 'path'
+          description: 'User ID'
+          required: true
+          schema:
+            type: 'integer'
+            format: 'int64'
+      responses:
+        200:
+          description: 'OK'
+components:
+  schemas:
+    ApiResponse:
+      type: 'object'
+      properties:
+        timestamp:
+          type: 'string'
+          format: date-time
+          example: '2020-03-21T14:23:12.294+0000'
+    ApiErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: 'object'
+          properties:
+            message:
+              type: 'string'
+              example: 'Error message'
+            path:
+              type: 'string'
+              example: '/users/12'
+    RegisterDto:
+      type: 'object'
+      properties:
+        username:
+          type: 'string'
+          example: 'username'
+        email:
+          type: 'string'
+          example: 'email@test.tld'
+        password:
+          type: 'string'
+          example: 'password'
+        firstName:
+          type: 'string'
+          example: 'Max'
+        lastName:
+          type: 'string'
+          example: 'Mustermann'
+      required:
+        - username
+        - email
+        - password
+        - firstName
+        - lastName
+    UserBasicInfo:
+      properties:
+        id:
+          type: 'integer'
+          format: 'int64'
+          example: 1
+        username:
+          type: 'string'
+          example: 'username'
+        email:
+          type: 'string'
+          example: 'email@test.tld'
+        firstName:
+          type: 'string'
+          example: 'Max'
+        lastName:
+          type: 'string'
+          example: 'Mustermann'
+        authorities:
+          type: 'array'
+          items:
+            $ref: '#/components/schemas/Authority'
+    Authority:
+      oneOf:
+        - $ref: '#/components/schemas/Role'
+        - $ref: '#/components/schemas/Permission'
+    Role:
+      type: 'string'
+      example: 'ROLE_USER'
+    Permission:
+      type: 'string'
+      example: 'USER_DELETE'
+  securitySchemes:
+    JWT:
+      type: 'http'
+      scheme: 'bearer'
+security:
+  - JWT: []
