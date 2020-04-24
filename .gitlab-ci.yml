@@ -1,7 +1,20 @@
+variables:
+  GIT_CLEAN_FLAGS: -ffdx -e node_modules/
+
 stages:
+  - dependencies
   - compile
   - test
   - build
+
+npm:
+  image: node:latest
+  script: npm install
+  cache:
+    key: npm
+    paths:
+      - node_modules/
+    policy: push
 
 compile-angular:
   image: node:latest
@@ -12,6 +25,9 @@ compile-angular:
     expire_in: 12 hours
     paths:
       - src\server\resources\static
+  cache:
+    key: npm
+    policy: pull
 
 compile-kotlin:
   image: maven:3.6.3-jdk-8
