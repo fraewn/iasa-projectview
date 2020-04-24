@@ -21,6 +21,7 @@ compile-angular:
   image: node:latest
   stage: compile
   script:
+    - ls -la
     - node_modules/.bin/ng build --prod
   artifacts:
     expire_in: 12 hours
