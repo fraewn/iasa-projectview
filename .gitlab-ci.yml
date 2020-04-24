@@ -9,6 +9,7 @@ stages:
 
 npm:
   image: node:latest
+  stage: dependencies
   script: npm install
   cache:
     key: npm
@@ -28,6 +29,8 @@ compile-angular:
   cache:
     key: npm
     policy: pull
+  dependencies:
+    - npm
 
 compile-kotlin:
   image: maven:3.6.3-jdk-8
