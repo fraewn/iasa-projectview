@@ -1,0 +1,52 @@
+stages:
+  - compile
+  - test
+  - build
+
+compile-angular:
+  image: node:latest
+  stage: compile
+  script:
+    - node_modules/bin/ng build --prod
+  artifacts:
+    expire_in: 12 hours
+    paths:
+      - src\server\resources\static
+
+compile-kotlin:
+  image: maven:3.6.3-jdk-8
+  stage: compile
+  script:
+    - ./mvnw compile
+  artifacts:
+    expire_in: 12 hours
+    paths:
+      - target/classes
+      - target/generated-sources
+      - target/maven-status
+
+test-angular:
+  image: node:latest
+  stage: test
+  script:
+    - ls
+
+#test-kotlin:
+#  image: maven:3.6.3-jdk-8
+#  stage: test
+#  script:
+#    - ./mvnw test
+
+package:
+  image: maven:3.6.3-jdk-8
+  stage: build
+  script:
+    - ./mvnw install -Dmaven.test.skip=true
+  dependencies:
+    - compile-kotlin
+    - compile-angular
+  artifacts:
+    expire_in: 12 hours
+    paths:
+      - target/projectview-0.0.1.jar
+
