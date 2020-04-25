@@ -1,6 +1,5 @@
 variables:
   GIT_CLEAN_FLAGS: -ffdx -e node_modules/
-  MAVEN_OPTS: --batch-mode
 
 stages:
   - dependencies
@@ -46,11 +45,6 @@ compile-kotlin:
       - target/classes
       - target/generated-sources
       - target/maven-status
-  cache:
-    key: maven
-    paths:
-      - maven.repository/
-    policy: push
 
 test-angular:
   image: node:latest
@@ -77,6 +71,4 @@ package:
     expire_in: 12 hours
     paths:
       - target/projectview-0.0.1.jar
-  cache:
-    key: maven
-    policy: pull
+
