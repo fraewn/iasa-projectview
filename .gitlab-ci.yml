@@ -17,6 +17,18 @@ npm:
       - node_modules/
     policy: push
 
+maven:
+  image: maven:3.6.3-jdk-8
+  stage: dependencies
+  script:
+    - mvn dependency:resolve
+    - ls -la
+  cache:
+    key: maven
+    paths:
+      - .m2/repository/
+    policy: push
+
 compile-angular:
   image: node:latest
   stage: compile
@@ -45,6 +57,9 @@ compile-kotlin:
       - target/classes
       - target/generated-sources
       - target/maven-status
+  cache:
+    key: maven
+    policy: pull
 
 test-angular:
   image: node:latest
@@ -64,6 +79,7 @@ package:
   script:
     - chmod a+x ./mvnw
     - ./mvnw install -Dmaven.test.skip=true
+    - ls -la
   dependencies:
     - compile-kotlin
     - compile-angular
@@ -71,4 +87,7 @@ package:
     expire_in: 12 hours
     paths:
       - target/projectview-0.0.1.jar
+  cache:
+    key: maven
+    policy: pull
 
