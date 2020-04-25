@@ -1,7 +1,7 @@
 variables:
   CACHE_DIR: cache
   MAVEN_CACHE_DIR: $CACHE_DIR/.m2
-  GIT_CLEAN_FLAGS: -ffdx -e node_modules/ -e $MAVEN_CACHE_DIR/
+  GIT_CLEAN_FLAGS: -ffdx -e node_modules/ -e "$MAVEN_CACHE_DIR/"
   MAVEN_OPTS: -Dmaven.repo.local=$CI_PROJECT_DIR/$MAVEN_CACHE_DIR/repository
 
 stages:
