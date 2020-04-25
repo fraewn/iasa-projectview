@@ -37,7 +37,8 @@ compile-kotlin:
   image: maven:3.6.3-jdk-8
   stage: compile
   script:
-    - mvn compile
+    - chmod a+x ./mvnw
+    - ./mvnw compile
   artifacts:
     expire_in: 12 hours
     paths:
@@ -61,7 +62,8 @@ package:
   image: maven:3.6.3-jdk-8
   stage: build
   script:
-    - mvn install -Dmaven.test.skip=true
+    - chmod a+x ./mvnw
+    - ./mvnw install -Dmaven.test.skip=true
   dependencies:
     - compile-kotlin
     - compile-angular
