@@ -1,8 +1,6 @@
 variables:
-  CACHE_DIR: cache
-  MAVEN_CACHE_DIR: $CACHE_DIR/.m2
-  GIT_CLEAN_FLAGS: -ffdx -e node_modules/ -e "$MAVEN_CACHE_DIR/"
-  MAVEN_OPTS: -Dmaven.repo.local=cache/.m2/repository
+  GIT_CLEAN_FLAGS: -ffdx -e node_modules/ -e .m2/
+  MAVEN_OPTS: -Dmaven.repo.local=.m2/repository
 
 stages:
   - dependencies
@@ -29,7 +27,7 @@ maven:
   cache:
     key: maven
     paths:
-      - $MAVEN_CACHE_DIR/repository/
+      - .m2/repository/
     policy: push
 
 compile-angular:
