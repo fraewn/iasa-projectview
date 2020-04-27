@@ -17,6 +17,9 @@ npm:
     paths:
       - node_modules/
     policy: push
+  only:
+    changes:
+      - package.json
 
 maven:
   image: maven:3.6.3-jdk-8
@@ -29,6 +32,9 @@ maven:
     paths:
       - .m2/repository/
     policy: push
+  only:
+    changes:
+      - pom.xml
 
 compile-angular:
   image: node:latest
