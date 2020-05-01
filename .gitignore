@@ -77,3 +77,6 @@ Thumbs.db
 
 src/server/resources/static
 src/server/resources/application.properties
+src/server/resources/application.yml
+
+*.http
