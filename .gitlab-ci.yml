@@ -74,11 +74,11 @@ test-angular:
   script:
     - ls
 
-#test-kotlin:
-#  image: maven:3.6.3-jdk-8
-#  stage: test
-#  script:
-#    - ./mvnw test
+test-kotlin:
+  image: maven:3.6.3-jdk-8
+  stage: test
+  script:
+    - ./mvnw -Dspring.profile.active=test test
 
 package:
   image: maven:3.6.3-jdk-8
