@@ -13,10 +13,12 @@ import kotlin.collections.set
 @Entity
 @Table(name = "iasauser")
 data class User(
+    @get:JsonIgnore
     @Column(name = "iasauser_name", nullable = false, unique = true)
     @get:JvmName("getUsername_")
     var username: String,
 
+    @get:JsonIgnore
     @Column(name = "iasauser_password", nullable = false)
     @get:JvmName("getPassword_")
     var password: String,
@@ -54,10 +56,12 @@ data class User(
             return payload
         }
 
+    @JsonIgnore
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
         return HashSet(roles.map { systemRole -> SimpleGrantedAuthority(systemRole.toString()) })
     }
 
+    @JsonIgnore
     override fun isEnabled(): Boolean {
         return isActive
     }
@@ -66,18 +70,22 @@ data class User(
         return username
     }
 
+    @JsonIgnore
     override fun isCredentialsNonExpired(): Boolean {
         return true // credentials do not expire in this application
     }
 
+    @JsonIgnore
     override fun getPassword(): String {
         return password
     }
 
+    @JsonIgnore
     override fun isAccountNonExpired(): Boolean {
         return !isExpired
     }
 
+    @JsonIgnore
     override fun isAccountNonLocked(): Boolean {
         return !isLocked
     }
