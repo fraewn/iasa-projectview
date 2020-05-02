@@ -78,9 +78,18 @@ test-angular:
 
 test-kotlin:
   image: maven:3.6.3-jdk-8
+  services:
+    - postgres:12.2-alpine
+  variables:
+    POSTGRES_DB: iasa-projectview-test
+    POSTGRES_USER: runner
+    POSTGRES_HOST_AUTH_METHOD: trust
   stage: test
   before_script:
     - chmod a+x ./mvnw
+    - echo ${POSTGRES_DB}
+    - export spring.datasource.url=jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+    - export spring.datasource.username=${POSTGRES_USER}
   script:
     - ./mvnw -Dspring.profile.active=test test
   allow_failure: true
