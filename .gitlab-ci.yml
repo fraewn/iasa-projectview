@@ -94,7 +94,7 @@ test-kotlin:
   script:
     - ./mvnw \
       -Dspring.profile.active=test \
-      -Dspring.config.location=file://src/server/kotlin/resources/application.yml \
+      -Dspring.config.location="file:///src/server/kotlin/resources/application.yml" \
       test
   dependencies:
     - compile-kotlin
