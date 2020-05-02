@@ -92,9 +92,7 @@ test-kotlin:
     - cp $APPLICATION_PROPERTIES_FILE_PATH config/application.yml
     - cat config/application.yml
   script:
-    - ./mvnw \
-      -Dspring.profile.active=test \
-      test
+    - ./mvnw test
   dependencies:
     - compile-kotlin
   allow_failure: true
