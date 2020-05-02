@@ -94,6 +94,8 @@ test-kotlin:
       -Dspring.datasource.username=${POSTGRES_USER} \
       -Dspring.datasource.initialization-mode=always \
       test
+  dependencies:
+    - compile-kotlin
   allow_failure: true
 
 package:
