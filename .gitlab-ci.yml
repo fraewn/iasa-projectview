@@ -87,6 +87,7 @@ test-kotlin:
   stage: test
   before_script:
     - chmod a+x ./mvnw
+    - touch src/server/kotlin/resources/application.yml
     - echo "$APPLICATION_PROPERTIES_FILE_PATH" > "src/server/kotlin/resources/application.yml"
     - cat src/server/kotlin/resources/application.yml
   script:
