@@ -87,8 +87,9 @@ test-kotlin:
   stage: test
   before_script:
     - chmod a+x ./mvnw
+    - mkdir -p src/server/kotlin/resources/
     - touch src/server/kotlin/resources/application.yml
-    - echo "$APPLICATION_PROPERTIES_FILE_PATH" > "src/server/kotlin/resources/application.yml"
+    - echo $APPLICATION_PROPERTIES_FILE_PATH > src/server/kotlin/resources/application.yml
     - cat src/server/kotlin/resources/application.yml
   script:
     - ./mvnw -Dspring.profile.active=test test
