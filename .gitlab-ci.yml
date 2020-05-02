@@ -20,6 +20,7 @@ npm:
   only:
     changes:
       - package.json
+      - package-lock.json
 
 maven:
   image: maven:3.6.3-jdk-8
