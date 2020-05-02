@@ -88,12 +88,7 @@ test-kotlin:
   before_script:
     - chmod a+x ./mvnw
   script:
-    - ./mvnw \
-      -Dspring.profile.active=test \
-      -Dspring.datasource.url="jdbc:postgresql://postgres:5432/${POSTGRES_DB}" \
-      -Dspring.datasource.username=${POSTGRES_USER} \
-      -Dspring.datasource.initialization-mode=always \
-      test
+    - ./mvnw -Dspring.profile.active=test test
   dependencies:
     - compile-kotlin
   allow_failure: true
