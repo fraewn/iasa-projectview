@@ -6,9 +6,12 @@ stages:
   - dependencies
   - compile
   - test
+  - package
   - build
 
 npm:
+  tags:
+    - docker
   image: node:latest
   stage: dependencies
   script: npm install
@@ -23,11 +26,13 @@ npm:
       - package-lock.json
 
 maven:
+  tags:
+    - docker
   image: maven:3.6.3-jdk-8
   stage: dependencies
-  script:
-    - mvn dependency:resolve
-    - ls -la
+  before_script:
+    - chmod a+x ./mvnw
+  script: ./mvnw dependency:resolve
   cache:
     key: maven
     paths:
@@ -38,11 +43,11 @@ maven:
       - pom.xml
 
 compile-angular:
+  tags:
+    - docker
   image: node:latest
   stage: compile
-  script:
-    - ls -la
-    - node_modules/.bin/ng build --prod
+  script: node_modules/.bin/ng build --prod
   artifacts:
     expire_in: 12 hours
     paths:
@@ -54,12 +59,13 @@ compile-angular:
     - npm
 
 compile-kotlin:
+  tags:
+    - docker
   image: maven:3.6.3-jdk-8
   stage: compile
   before_script:
     - chmod a+x ./mvnw
-  script:
-    - ./mvnw compile
+  script: ./mvnw compile
   artifacts:
     expire_in: 12 hours
     paths:
@@ -77,6 +83,8 @@ compile-kotlin:
 #    - ls
 
 test-kotlin:
+  tags:
+    - docker
   image: maven:3.6.3-jdk-8
   services:
     - postgres:12.2-alpine
@@ -91,19 +99,19 @@ test-kotlin:
     - touch config/application.yml
     - cp $APPLICATION_PROPERTIES_FILE_PATH config/application.yml
     - cat config/application.yml
-  script:
-    - ./mvnw test
+  script: ./mvnw test
   dependencies:
     - compile-kotlin
   allow_failure: true
 
 package:
+  tags:
+    - docker
   image: maven:3.6.3-jdk-8
-  stage: build
-  script:
+  stage: package
+  before_script:
     - chmod a+x ./mvnw
-    - ./mvnw install -Dmaven.test.skip=true
-    - ls -la
+  script: ./mvnw install -Dmaven.test.skip=true
   dependencies:
     - compile-kotlin
     - compile-angular
@@ -115,3 +123,10 @@ package:
     key: maven
     policy: pull
 
+build-docker:
+  tags:
+    - shell
+  stage: build
+  script: docker ps
+  dependencies:
+    - package
