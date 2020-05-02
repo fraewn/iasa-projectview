@@ -87,12 +87,13 @@ test-kotlin:
   stage: test
   before_script:
     - chmod a+x ./mvnw
-    - set spring.profile.active=test
-    - set spring.datasource.url=jdbc:postgresql://postgres:5432/${POSTGRES_DB}
-    - set spring.datasource.username=${POSTGRES_USER}
-    - set spring.datasource.initialization-mode=always
   script:
-    - ./mvnw test
+    - ./mvnw \
+      -Dspring.profile.active=test \
+      -Dspring.datasource.url="jdbc:postgresql://postgres:5432/${POSTGRES_DB}" \
+      -Dspring.datasource.username=${POSTGRES_USER} \
+      -Dspring.datasource.initialization-mode=always \
+      test
   allow_failure: true
 
 package:
