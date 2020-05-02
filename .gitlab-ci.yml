@@ -56,8 +56,9 @@ compile-angular:
 compile-kotlin:
   image: maven:3.6.3-jdk-8
   stage: compile
-  script:
+  before_script:
     - chmod a+x ./mvnw
+  script:
     - ./mvnw compile
   artifacts:
     expire_in: 12 hours
@@ -78,8 +79,11 @@ test-angular:
 test-kotlin:
   image: maven:3.6.3-jdk-8
   stage: test
+  before_script:
+    - chmod a+x ./mvnw
   script:
     - ./mvnw -Dspring.profile.active=test test
+  allow_failure: true
 
 package:
   image: maven:3.6.3-jdk-8
