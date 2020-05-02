@@ -127,6 +127,9 @@ build-docker:
   tags:
     - shell
   stage: build
-  script: docker ps
+  script:
+    - docker ps
+    - ls -la
+    - pwd
   dependencies:
     - package
