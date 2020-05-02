@@ -20,9 +20,9 @@ class TestDataSourceConfig(
     fun dataSource(): DataSource {
         return DataSourceBuilder.create()
             .driverClassName("org.postgresql.Driver")
-            .url("jdbc:postgresql://postgres:5432/${env.getRequiredProperty("POSTGRES_DB")}")
+            .url("jdbc:postgresql://${env.getRequiredProperty("POSTGRES_HOST")}:5432/${env.getRequiredProperty("POSTGRES_DB")}")
             .username(env.getRequiredProperty("POSTGRES_USER"))
-            .password("")
+            .password(env.getRequiredProperty("POSTGRES_PASSWORD"))
             .build()
     }
 }

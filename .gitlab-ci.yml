@@ -70,25 +70,25 @@ compile-kotlin:
     key: maven
     policy: pull-push
 
-test-angular:
-  image: node:latest
-  stage: test
-  script:
-    - ls
+#test-angular:
+#  image: node:latest
+#  stage: test
+#  script:
+#    - ls
 
 test-kotlin:
   image: maven:3.6.3-jdk-8
   services:
     - postgres:12.2-alpine
   variables:
-    POSTGRES_DB: iasa-projectview-test
-    POSTGRES_USER: runner
+    POSTGRES_DB: iasa-projectview-test #do not change (or change in pipeline variable too)
+    POSTGRES_USER: runner #do not change (or change in pipeline variable too)
     POSTGRES_HOST_AUTH_METHOD: trust
   stage: test
   before_script:
     - chmod a+x ./mvnw
   script:
-    - ./mvnw -Dspring.profile.active=test test
+    - ./mvnw -Dspring.profile.active=test -Dspring.config.location="file://${APPLICATION_PROPERTIES_FILE_PATH}" test
   dependencies:
     - compile-kotlin
   allow_failure: true
