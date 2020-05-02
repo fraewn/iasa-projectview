@@ -4,13 +4,15 @@ import com.iasa.projectview.model.entity.User
 import com.iasa.projectview.model.entity.User.RegisterDto
 import com.iasa.projectview.persistence.repository.SystemRoleRepository
 import com.iasa.projectview.persistence.repository.UserRepository
+import org.springframework.context.annotation.Primary
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
-@Service("defaultUserService")
+@Service
+@Primary
 class UserService(
     private val userRepository: UserRepository,
     private val systemRoleRepository: SystemRoleRepository,

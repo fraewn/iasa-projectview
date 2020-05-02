@@ -2,7 +2,6 @@ package com.iasa.projectview.config
 
 import com.iasa.projectview.security.filter.JwtAuthenticationFilter
 import com.iasa.projectview.security.filter.JwtVerificationFilter
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
@@ -24,7 +23,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 class SecurityConfig(
     private val encoder: PasswordEncoder,
-    @Qualifier("defaultUserService")
     private val userDetailsService: UserDetailsService,
     private val env: Environment
 ) : WebSecurityConfigurerAdapter() {
