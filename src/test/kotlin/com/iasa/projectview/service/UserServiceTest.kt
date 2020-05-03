@@ -3,11 +3,9 @@ package com.iasa.projectview.service
 import com.iasa.projectview.config.UserServiceTestConfiguration.TestData.NEW_USER_DTO
 import com.iasa.projectview.model.entity.User
 import com.iasa.projectview.persistence.repository.UserRepository
-import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Order
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.security.core.userdetails.UsernameNotFoundException
@@ -16,17 +14,15 @@ import org.springframework.test.context.ActiveProfiles
 @ActiveProfiles("test")
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestMethodOrder(OrderAnnotation::class)
 internal class UserServiceTest(
     @Autowired private val userService: UserService,
     @Autowired private val userRepository: UserRepository
 ) {
-    private lateinit var newUser: User
-
     @Test
     @Order(1)
     fun `assert that a user is added correctly to the database`() {
         val newUser = (userService.registerUser(NEW_USER_DTO))
-        this.newUser = newUser
         assertEquals(NEW_USER_DTO.username, newUser.username)
         assertNotEquals(NEW_USER_DTO.password, newUser.password)
         assertNotEquals(newUser.id, 0)
@@ -51,6 +47,6 @@ internal class UserServiceTest(
 
     @AfterAll
     fun teardown() {
-        userRepository.deleteById(newUser.id)
+        userRepository.delete(userRepository.findOneByUsername(NEW_USER_DTO.username)!!)
     }
 }
