@@ -28,7 +28,7 @@ import org.springframework.web.context.WebApplicationContext
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(OrderAnnotation::class)
-internal class AuthTest(
+internal class AuthenticationIntegrationTest(
     @Autowired private val context: WebApplicationContext,
     @Autowired private val userRepository: UserRepository,
     @Autowired private val env: Environment
@@ -45,18 +45,19 @@ internal class AuthTest(
 
     @Test
     @Order(1)
-    fun `assert that registration succeeds`() {
+    fun `api users with registration credentials returns Created with Location header`() {
         mvc.perform(
             post("/api/users").contentType(MediaType.APPLICATION_JSON)
                 .content(jacksonObjectMapper().writeValueAsString(TEST_REGISTER_DTO))
         ).andExpect { result ->
             assertEquals(HttpStatus.CREATED.value(), result.response.status)
+            assertNotNull(result.response.headerNames.contains("Location"))
         }
     }
 
     @Test
     @Order(2)
-    fun `assert that login succeeds and returns a valid JWT`() {
+    fun `api login with existing user credentials returns Authorization header with JWT`() {
         mvc.perform(
             post("/api/login").contentType(MediaType.APPLICATION_JSON)
                 .content(jacksonObjectMapper().writeValueAsString(TEST_LOGIN_DTO))

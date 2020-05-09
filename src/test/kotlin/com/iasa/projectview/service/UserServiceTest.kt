@@ -21,7 +21,7 @@ internal class UserServiceTest(
 ) {
     @Test
     @Order(1)
-    fun `assert that a user is added correctly to the database`() {
+    fun `registerUser with register credentials returns newly added user`() {
         val newUser = (userService.registerUser(NEW_USER_DTO))
         assertEquals(NEW_USER_DTO.username, newUser.username)
         assertNotEquals(NEW_USER_DTO.password, newUser.password)
@@ -30,7 +30,7 @@ internal class UserServiceTest(
 
     @Test
     @Order(2)
-    fun `assert that user is loaded correctly from the database`() {
+    fun `loadUserByUsername with username from existing user returns user`() {
         val loadedUser = userService.loadUserByUsername(NEW_USER_DTO.username) as User
         assertEquals(NEW_USER_DTO.username, loadedUser.username)
         assertNotEquals(NEW_USER_DTO.password, loadedUser.password)
@@ -39,7 +39,7 @@ internal class UserServiceTest(
 
     @Test
     @Order(3)
-    fun `assert that the appropriate exception is thrown for the wrong username`() {
+    fun `loadUserByUsername with username from not existing user throws UsernameNotFoundException`() {
         assertThrows(UsernameNotFoundException::class.java) {
             userService.loadUserByUsername("someRandomUsername")
         }
