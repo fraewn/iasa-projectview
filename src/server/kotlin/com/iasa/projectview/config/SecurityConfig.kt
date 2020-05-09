@@ -1,5 +1,6 @@
 package com.iasa.projectview.config
 
+import com.iasa.projectview.controller.UsersApi
 import com.iasa.projectview.security.filter.JwtAuthenticationFilter
 import com.iasa.projectview.security.filter.JwtVerificationFilter
 import org.springframework.context.annotation.Bean
@@ -26,6 +27,9 @@ class SecurityConfig(
     private val userDetailsService: UserDetailsService,
     private val env: Environment
 ) : WebSecurityConfigurerAdapter() {
+    companion object {
+        const val LOGIN_ROUTE = "/api/login"
+    }
 
     override fun configure(http: HttpSecurity) {
         http
@@ -34,7 +38,7 @@ class SecurityConfig(
             .and()
             .authorizeRequests()
             // register route
-            .antMatchers(HttpMethod.POST, "/api/users").permitAll()
+            .antMatchers(HttpMethod.POST, UsersApi.USERS_API_ROUTE).permitAll()
             // static files (matches anything that does not start with /api)
             // language=RegExp
             .regexMatchers(HttpMethod.GET, "/((?!api).*)").permitAll()
@@ -80,7 +84,7 @@ class SecurityConfig(
 
     private fun jwtAuthenticationFilter(): JwtAuthenticationFilter {
         val filter = JwtAuthenticationFilter()
-        filter.setFilterProcessesUrl("/api/login")
+        filter.setFilterProcessesUrl(LOGIN_ROUTE)
         filter.setAuthenticationManager(authenticationManager())
         filter.environment = env
         return filter

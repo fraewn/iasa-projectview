@@ -1,8 +1,8 @@
 package com.iasa.projectview.service
 
-import com.iasa.projectview.config.UserServiceTestConfiguration.TestData.NEW_USER_DTO
 import com.iasa.projectview.model.entity.User
 import com.iasa.projectview.persistence.repository.UserRepository
+import com.iasa.projectview.service.UserServiceUnitTestConfiguration.TestData.NEW_USER_DTO
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation
@@ -15,7 +15,7 @@ import org.springframework.test.context.ActiveProfiles
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(OrderAnnotation::class)
-internal class UserServiceTest(
+internal class UserServiceUnitTest(
     @Autowired private val userService: UserService,
     @Autowired private val userRepository: UserRepository
 ) {
