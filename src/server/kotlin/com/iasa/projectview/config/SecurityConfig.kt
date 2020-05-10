@@ -3,6 +3,7 @@ package com.iasa.projectview.config
 import com.iasa.projectview.controller.UsersApi
 import com.iasa.projectview.security.filter.JwtAuthenticationFilter
 import com.iasa.projectview.security.filter.JwtVerificationFilter
+import com.iasa.projectview.util.handler.IASAExceptionHandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
@@ -13,6 +14,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.cors.CorsConfiguration
@@ -34,11 +36,17 @@ class SecurityConfig(
     override fun configure(http: HttpSecurity) {
         http
             .csrf().disable()
-            .cors().configurationSource(corsConfig())
+            .cors { it.configurationSource(corsConfig()) }
+            .sessionManagement()
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .and()
+            .exceptionHandling()
+            .authenticationEntryPoint(IASAExceptionHandler())
+            .accessDeniedHandler(IASAExceptionHandler())
             .and()
             .authorizeRequests()
             // register route
-            .antMatchers(HttpMethod.POST, UsersApi.USERS_API_ROUTE).permitAll()
+            .antMatchers(HttpMethod.POST, UsersApi.ROUTE).permitAll()
             // static files (matches anything that does not start with /api)
             // language=RegExp
             .regexMatchers(HttpMethod.GET, "/((?!api).*)").permitAll()
