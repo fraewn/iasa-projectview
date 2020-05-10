@@ -33,4 +33,8 @@ class UserService(
             )
         )
     }
+
+    fun getAll(): List<User> {
+        return userRepository.findAll()
+    }
 }
