@@ -50,7 +50,7 @@ internal class AuthenticationIntegrationTest(
     }
 
     @Test
-    fun `post to login route with existing user credentials returns Authorization header with JWT`() {
+    fun `post to login route with existing user credentials returns Ok wiht Authorization header containing JWT`() {
         mvc.perform(
             post(SecurityConfig.LOGIN_ROUTE).contentType(MediaType.APPLICATION_JSON)
                 .content(jacksonObjectMapper().writeValueAsString(TEST_LOGIN_DTO))
