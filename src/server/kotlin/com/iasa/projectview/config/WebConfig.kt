@@ -8,11 +8,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 class WebConfig : WebMvcConfigurer {
 
 	override fun addViewControllers(registry: ViewControllerRegistry) {
+		val viewName = "forward:/"
 		registry.addViewController("/{spring:\\w+}")
-			.setViewName("forward:/")
+			.setViewName(viewName)
 		registry.addViewController("/**/{spring:\\w+}")
-			.setViewName("forward:/")
+			.setViewName(viewName)
 		registry.addViewController("/{spring:\\w+}/**{spring:?!(\\.js|\\.css)$}")
-			.setViewName("forward:/")
+			.setViewName(viewName)
 	}
 }
