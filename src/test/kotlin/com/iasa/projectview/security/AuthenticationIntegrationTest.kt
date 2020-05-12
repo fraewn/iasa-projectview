@@ -83,6 +83,6 @@ internal class AuthenticationIntegrationTest(
 
     @AfterAll
     fun teardown() {
-        userRepository.delete(userRepository.findOneByUsername(TEST_REGISTER_DTO.username)!!)
+        userRepository.deleteAll()
     }
 }

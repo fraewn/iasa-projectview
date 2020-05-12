@@ -20,9 +20,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
-import org.springframework.security.authentication.BadCredentialsException
-import org.springframework.security.authentication.CredentialsExpiredException
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
@@ -80,13 +77,13 @@ internal class UsersApiControllerIntegrationTest(
             )
             .compact()
 
-        assertThrows(CredentialsExpiredException::class.java) {
-            mvc.perform(
-                MockMvcRequestBuilders
-                    .get(UsersApi.ROUTE)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .header("Authorization", "Bearer $expiredJwt")
-            )
+        mvc.perform(
+            MockMvcRequestBuilders
+                .get(UsersApi.ROUTE)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer $expiredJwt")
+        ).andExpect { result ->
+            assertEquals(HttpStatus.UNAUTHORIZED.value(), result.response.status)
         }
     }
 
@@ -101,13 +98,13 @@ internal class UsersApiControllerIntegrationTest(
             )
             .compact()
 
-        assertThrows(BadCredentialsException::class.java) {
-            mvc.perform(
-                MockMvcRequestBuilders
-                    .get(UsersApi.ROUTE)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .header("Authorization", "Bearer $invalidSignatureJwt")
-            )
+        mvc.perform(
+            MockMvcRequestBuilders
+                .get(UsersApi.ROUTE)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer $invalidSignatureJwt")
+        ).andExpect { result ->
+            assertEquals(HttpStatus.UNAUTHORIZED.value(), result.response.status)
         }
     }
 
@@ -128,13 +125,13 @@ internal class UsersApiControllerIntegrationTest(
             )
             .compact()
 
-        assertThrows(AuthenticationCredentialsNotFoundException::class.java) {
-            mvc.perform(
-                MockMvcRequestBuilders
-                    .get(UsersApi.ROUTE)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .header("Authorization", "Bearer $validJwtForNonExistingUser")
-            )
+        mvc.perform(
+            MockMvcRequestBuilders
+                .get(UsersApi.ROUTE)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer $validJwtForNonExistingUser")
+        ).andExpect { result ->
+            assertEquals(HttpStatus.UNAUTHORIZED.value(), result.response.status)
         }
     }
 

@@ -47,6 +47,6 @@ internal class UserServiceUnitTest(
 
     @AfterAll
     fun teardown() {
-        userRepository.delete(userRepository.findOneByUsername(NEW_USER_DTO.username)!!)
+        userRepository.deleteAll()
     }
 }
