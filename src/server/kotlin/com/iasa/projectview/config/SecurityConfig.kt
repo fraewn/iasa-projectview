@@ -1,9 +1,9 @@
 package com.iasa.projectview.config
 
+import com.iasa.projectview.controller.IASAExceptionHandler
 import com.iasa.projectview.controller.UsersApi
 import com.iasa.projectview.security.filter.JwtAuthenticationFilter
 import com.iasa.projectview.security.filter.JwtVerificationFilter
-import com.iasa.projectview.util.handler.IASAExceptionHandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
