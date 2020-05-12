@@ -1,9 +1,7 @@
 package com.iasa.projectview.security.filter
 
-import io.jsonwebtoken.Claims
-import io.jsonwebtoken.ExpiredJwtException
-import io.jsonwebtoken.Jws
-import io.jsonwebtoken.Jwts
+import com.iasa.projectview.controller.IASAExceptionHandler
+import io.jsonwebtoken.*
 import io.jsonwebtoken.security.SignatureException
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
 import org.springframework.security.authentication.BadCredentialsException
@@ -19,6 +17,9 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 class JwtVerificationFilter(private val userDetailsService: UserDetailsService) : OncePerRequestFilter() {
+
+    private val handler = IASAExceptionHandler()
+
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain) {
         // registering url does not need to check for a valid token
         if (request.requestURI == "/users" && request.method == RequestMethod.POST.name) {
@@ -51,11 +52,13 @@ class JwtVerificationFilter(private val userDetailsService: UserDetailsService) 
             authentication.details = user
             SecurityContextHolder.getContext().authentication = authentication
         } catch (e: SignatureException) {
-            throw BadCredentialsException("Token has invalid signature", e)
+            handler.commence(request, response, BadCredentialsException("Token has invalid signature", e))
         } catch (e: ExpiredJwtException) {
-            throw CredentialsExpiredException("Token is expired", e)
+            handler.commence(request, response, CredentialsExpiredException("Token is expired", e))
         } catch (e: UsernameNotFoundException) {
-            throw AuthenticationCredentialsNotFoundException(e.message, e)
+            handler.commence(request, response, AuthenticationCredentialsNotFoundException(e.message, e))
+        } catch (e: MalformedJwtException) {
+            handler.commence(request, response, BadCredentialsException("Malformed token", e))
         }
 
         chain.doFilter(request, response)
