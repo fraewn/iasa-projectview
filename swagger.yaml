@@ -7,17 +7,15 @@ info:
     email: accounts@malteesch.de
   version: 1.0.0
 servers:
-  - url: http://localhost:8080/
+  - url: http://localhost:8080/api
     description: 'Dev'
   - url: http://10.20.107.223:8080/
-    description: 'Depl'
+    description: 'Prod'
 tags:
   - name: 'authentication'
     description: 'Registration, login, password reset'
   - name: 'user management'
     description: 'Everything involving user management (requires ADMIN rights)'
-  - name: 'schools'
-    description: 'Manage schools'
 paths:
   /login:
     post:
@@ -33,13 +31,12 @@ paths:
             schema:
               type: 'object'
               properties:
-                identifier:
+                username:
                   type: 'string'
-                  description: 'username or email'
                 password:
                   type: 'string'
               required:
-                - identifier
+                - username
                 - password
       responses:
         200:
