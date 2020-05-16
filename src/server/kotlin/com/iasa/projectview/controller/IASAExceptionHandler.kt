@@ -2,6 +2,7 @@ package com.iasa.projectview.controller
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.iasa.projectview.model.dto.IASAErrorResponse
+import com.iasa.projectview.model.exception.ExistsException
 import com.iasa.projectview.model.exception.IASAException
 import com.iasa.projectview.model.exception.NotFoundException
 import org.springframework.http.HttpStatus
@@ -48,7 +49,7 @@ class IASAExceptionHandler : AuthenticationEntryPoint, AccessDeniedHandler {
                 code.value(),
                 code.reasonPhrase,
                 req?.requestURI ?: "unknown"
-            ), evaluateStatusCode(e)
+            ), code
         )
     }
 
@@ -57,6 +58,7 @@ class IASAExceptionHandler : AuthenticationEntryPoint, AccessDeniedHandler {
             e is AuthenticationException -> HttpStatus.UNAUTHORIZED
             e is AccessDeniedException -> HttpStatus.FORBIDDEN
             e is NotFoundException -> HttpStatus.NOT_FOUND
+            e is ExistsException -> HttpStatus.CONFLICT
             e!!::class.isSubclassOf(IASAException::class) -> HttpStatus.INTERNAL_SERVER_ERROR
             else -> HttpStatus.INTERNAL_SERVER_ERROR
         }

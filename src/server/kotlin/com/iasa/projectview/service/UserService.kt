@@ -2,6 +2,7 @@ package com.iasa.projectview.service
 
 import com.iasa.projectview.model.entity.User
 import com.iasa.projectview.model.entity.User.RegisterDto
+import com.iasa.projectview.model.exception.ExistsException
 import com.iasa.projectview.persistence.repository.SystemRoleRepository
 import com.iasa.projectview.persistence.repository.UserRepository
 import org.springframework.context.annotation.Primary
@@ -19,12 +20,13 @@ class UserService(
     private val encoder: PasswordEncoder
 ) : UserDetailsService {
 
-    override fun loadUserByUsername(username: String): UserDetails {
-        return userRepository.findOneByUsername(username)
-            ?: throw UsernameNotFoundException("User $username does not exist")
-    }
+    override fun loadUserByUsername(username: String): UserDetails = userRepository.findOneByUsername(username)
+        ?: throw UsernameNotFoundException("User $username does not exist")
 
     fun registerUser(dto: RegisterDto): User {
+        if (userRepository.findOneByUsername(dto.username) != null) {
+            throw ExistsException("User already exists")
+        }
         return userRepository.save(
             User(
                 dto.username,
@@ -34,7 +36,5 @@ class UserService(
         )
     }
 
-    fun getAll(): List<User> {
-        return userRepository.findAll()
-    }
+    fun getAll(): List<User> = userRepository.findAll()
 }
