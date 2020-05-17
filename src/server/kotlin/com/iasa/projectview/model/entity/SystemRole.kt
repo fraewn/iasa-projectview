@@ -13,6 +13,11 @@ data class SystemRole(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int = 0
 ) {
+    companion object {
+        const val ADMIN = "admin"
+        const val GUEST = "guest"
+    }
+
     override fun toString(): String {
         return "ROLE_${name.toUpperCase()}"
     }
