@@ -1,6 +1,7 @@
 package com.iasa.projectview.security.filter
 
 import com.iasa.projectview.controller.IASAExceptionHandler
+import com.iasa.projectview.controller.UsersApi
 import io.jsonwebtoken.*
 import io.jsonwebtoken.security.SignatureException
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
@@ -22,7 +23,7 @@ class JwtVerificationFilter(private val userDetailsService: UserDetailsService) 
 
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain) {
         // registering url does not need to check for a valid token
-        if (request.requestURI == "/users" && request.method == RequestMethod.POST.name) {
+        if (request.requestURI == UsersApi.ROUTE && request.method == RequestMethod.POST.name) {
             chain.doFilter(request, response)
             return
         }

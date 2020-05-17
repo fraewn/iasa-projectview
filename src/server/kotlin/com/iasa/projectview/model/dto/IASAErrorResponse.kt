@@ -6,7 +6,7 @@ data class IASAErrorResponse(
     val message: String,
     val code: Int,
     val status: String,
-    val path: String
+    val path: String,
+    val timestamp: Long = Date().time
 ) {
-    val timestamp by lazy { Date().time }
 }

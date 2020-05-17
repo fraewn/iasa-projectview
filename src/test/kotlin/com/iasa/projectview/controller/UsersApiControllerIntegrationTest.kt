@@ -1,23 +1,18 @@
 package com.iasa.projectview.controller
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.iasa.projectview.controller.UsersApiControllerIntegrationTestConfiguration.TestData.TEST_ADMIN_USER
-import com.iasa.projectview.controller.UsersApiControllerIntegrationTestConfiguration.TestData.TEST_GUEST_USER
-import com.iasa.projectview.controller.UsersApiControllerIntegrationTestConfiguration.TestData.TEST_NON_EXISTING_USER
-import com.iasa.projectview.controller.UsersApiControllerIntegrationTestConfiguration.TestData.TEST_REGISTER_DTO
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.iasa.projectview.model.dto.IASAErrorResponse
+import com.iasa.projectview.model.entity.SystemRole
+import com.iasa.projectview.model.entity.User
 import com.iasa.projectview.persistence.repository.UserRepository
-import com.iasa.projectview.util.addSeconds
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.security.Keys
-import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
@@ -30,24 +25,34 @@ import java.util.*
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class UsersApiControllerIntegrationTest(
-    @Autowired private val userRepository: UserRepository,
-    @Autowired private val environment: Environment
+    @Autowired private val userRepository: UserRepository
 ) {
 
     @Autowired
     private lateinit var mvc: MockMvc
 
-    @BeforeAll
-    fun setUp() {
-        userRepository.save(TEST_ADMIN_USER)
-        userRepository.save(TEST_GUEST_USER)
-    }
+    private val username = "testUser"
+    private val password = "testPassword"
+    val testRegisterDto = User.RegisterDto(
+        username,
+        password
+    )
+
+    val testGuestUser = User(
+        "guest",
+        "password",
+        HashSet(listOf(SystemRole(SystemRole.GUEST, 2))),
+        2,
+        isActive = true,
+        isLocked = true,
+        isExpired = true
+    )
 
     @Test
     fun `post to UsersApi with registration credentials returns Created with Location header`() {
         mvc.perform(
             MockMvcRequestBuilders.post(UsersApi.ROUTE).contentType(MediaType.APPLICATION_JSON)
-                .content(jacksonObjectMapper().writeValueAsString(TEST_REGISTER_DTO))
+                .content(jacksonObjectMapper().writeValueAsBytes(testRegisterDto))
         ).andExpect { result ->
             assertEquals(HttpStatus.CREATED.value(), result.response.status)
             val locationHeader: String? = result.response.getHeader("Location")
@@ -56,140 +61,23 @@ internal class UsersApiControllerIntegrationTest(
     }
 
     @Test
-    fun `get to UsersApi without Authorization header returns Unauthorized`() {
+    fun `post to UsersApi with credentials from existing user returns Conflict`() {
+        userRepository.save(testGuestUser)
+
         mvc.perform(
-            MockMvcRequestBuilders.get(UsersApi.ROUTE).accept(MediaType.APPLICATION_JSON)
+            MockMvcRequestBuilders.post(UsersApi.ROUTE).contentType(MediaType.APPLICATION_JSON).content(
+                jacksonObjectMapper().writeValueAsBytes(User.RegisterDto("guest", "password"))
+            )
         ).andExpect { result ->
-            assertEquals(HttpStatus.UNAUTHORIZED.value(), result.response.status)
+            val responseBody = jacksonObjectMapper().readValue<IASAErrorResponse>(result.response.contentAsString)
+            assertEquals(HttpStatus.CONFLICT.value(), result.response.status)
+            assertEquals(HttpStatus.CONFLICT.value(), responseBody.code)
+            assertEquals(HttpStatus.CONFLICT.reasonPhrase, responseBody.status)
+            assertEquals(UsersApi.ROUTE, responseBody.path)
         }
     }
 
-    @Test
-    fun `get to UsersApi with expired Jwt returns Unauthorized`() {
-        val expiredJwt = Jwts.builder()
-            .setClaims(TEST_ADMIN_USER.jwtPayload)
-            .setIssuedAt(Date())
-            .setExpiration(Date().addSeconds(-1))
-            .signWith(
-                Keys.hmacShaKeyFor(
-                    environment.getRequiredProperty("application.security.jwt.secret").toByteArray()
-                )
-            )
-            .compact()
-
-        mvc.perform(
-            MockMvcRequestBuilders
-                .get(UsersApi.ROUTE)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer $expiredJwt")
-        ).andExpect { result ->
-            assertEquals(HttpStatus.UNAUTHORIZED.value(), result.response.status)
-        }
-    }
-
-    @Test
-    fun `get to UsersApi with invalid Jwt signature returns Unauthorized`() {
-        val invalidSignatureJwt = Jwts.builder()
-            .setClaims(TEST_ADMIN_USER.jwtPayload)
-            .setIssuedAt(Date())
-            .setExpiration(Date().addSeconds(-1))
-            .signWith(
-                Keys.hmacShaKeyFor("invalidSecretThatIsDefinitelyLongEnough".toByteArray())
-            )
-            .compact()
-
-        mvc.perform(
-            MockMvcRequestBuilders
-                .get(UsersApi.ROUTE)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer $invalidSignatureJwt")
-        ).andExpect { result ->
-            assertEquals(HttpStatus.UNAUTHORIZED.value(), result.response.status)
-        }
-    }
-
-    @Test
-    fun `get to UsersApi with valid Jwt for non existing user returns Unauthorized`() {
-        val validJwtForNonExistingUser = Jwts.builder()
-            .setClaims(TEST_NON_EXISTING_USER.jwtPayload)
-            .setIssuedAt(Date())
-            .setExpiration(
-                Date().addSeconds(
-                    environment.getRequiredProperty("application.security.jwt.expiration.seconds").toInt()
-                )
-            )
-            .signWith(
-                Keys.hmacShaKeyFor(
-                    environment.getRequiredProperty("application.security.jwt.secret").toByteArray()
-                )
-            )
-            .compact()
-
-        mvc.perform(
-            MockMvcRequestBuilders
-                .get(UsersApi.ROUTE)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer $validJwtForNonExistingUser")
-        ).andExpect { result ->
-            assertEquals(HttpStatus.UNAUTHORIZED.value(), result.response.status)
-        }
-    }
-
-    @Test
-    fun `get to UsersApi with valid Jwt for guest user returns Forbidden`() {
-        val validJwtForGuestUser = Jwts.builder()
-            .setClaims(TEST_GUEST_USER.jwtPayload)
-            .setIssuedAt(Date())
-            .setExpiration(
-                Date().addSeconds(
-                    environment.getRequiredProperty("application.security.jwt.expiration.seconds").toInt()
-                )
-            )
-            .signWith(
-                Keys.hmacShaKeyFor(
-                    environment.getRequiredProperty("application.security.jwt.secret").toByteArray()
-                )
-            )
-            .compact()
-
-        mvc.perform(
-            MockMvcRequestBuilders
-                .get(UsersApi.ROUTE)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer $validJwtForGuestUser")
-        ).andExpect { result ->
-            assertEquals(HttpStatus.FORBIDDEN.value(), result.response.status)
-        }
-    }
-
-    @Test
-    fun `get to UsersApi with valid Jwt for admin user returns Ok`() {
-        val validJwtForGuestUser = Jwts.builder()
-            .setClaims(TEST_ADMIN_USER.jwtPayload)
-            .setIssuedAt(Date())
-            .setExpiration(
-                Date().addSeconds(
-                    environment.getRequiredProperty("application.security.jwt.expiration.seconds").toInt()
-                )
-            )
-            .signWith(
-                Keys.hmacShaKeyFor(
-                    environment.getRequiredProperty("application.security.jwt.secret").toByteArray()
-                )
-            )
-            .compact()
-
-        mvc.perform(
-            MockMvcRequestBuilders
-                .get(UsersApi.ROUTE)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer $validJwtForGuestUser")
-        ).andExpect { result ->
-            assertEquals(HttpStatus.OK.value(), result.response.status)
-        }
-    }
-
-    @AfterAll
+    @AfterEach
     fun tearDown() {
         userRepository.deleteAll()
     }
