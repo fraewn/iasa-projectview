@@ -15,15 +15,13 @@ class PasswordConfig(private val env: Environment) {
      */
     @Bean
     fun passwordEncoder(): PasswordEncoder {
-        val encoders = HashMap<String, PasswordEncoder>()
 
         // BCrypt
-        val bcryptStrength: Int? = env.getRequiredProperty("application.security.bcrypt.strength").toInt()
-        val bcryptPasswordEncoder = BCryptPasswordEncoder(bcryptStrength ?: 12)
-        encoders["bcrypt"] = bcryptPasswordEncoder
+        val bcryptStrength: Int? = env.getProperty("application.security.bcrypt.strength")?.toInt()
+        val encoders = mapOf(
+            "bcrypt" to BCryptPasswordEncoder(bcryptStrength ?: 12)
+        )
 
-        val encoder = DelegatingPasswordEncoder("bcrypt", encoders)
-        encoder.setDefaultPasswordEncoderForMatches(bcryptPasswordEncoder)
-        return encoder
+        return DelegatingPasswordEncoder("bcrypt", encoders)
     }
 }
